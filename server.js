@@ -74,3 +74,21 @@ app.get('/api/flavors/:id', async (req, res) => {
       res.status(500).send('Server Error');
     }
   }); 
+
+  app.put('/api/flavors/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name, is_favorite } = req.body;
+      const client = await pool.connect();
+      const result = await client.query('UPDATE flavors SET name = $1, is_favorite = $2 WHERE id = $3 RETURNING *', [name, is_favorite, id]);
+      const updatedFlavor = result.rows[0];
+      if (!updatedFlavor) {
+        return res.status(404).json({ error: 'Flavor not found' });
+      }
+      res.json(updatedFlavor);
+      client.release();
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');
+    }
+  });
