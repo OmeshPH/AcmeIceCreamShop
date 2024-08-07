@@ -30,3 +30,20 @@ app.get('/api/flavors', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
+
+app.get('/api/flavors/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const client = await pool.connect();
+      const result = await client.query('SELECT * FROM flavors WHERE id = $1', [id]);
+      const flavor = result.rows[0];
+      if (!flavor) {
+        return res.status(404).json({ error: 'Flavor not found' });
+      }
+      res.json(flavor);
+      client.release();
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');
+    }
+  });
