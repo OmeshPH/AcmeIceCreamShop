@@ -61,3 +61,16 @@ app.get('/api/flavors/:id', async (req, res) => {
       res.status(500).send('Server Error');
     }
   });
+
+  app.delete('/api/flavors/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const client = await pool.connect();
+      await client.query('DELETE FROM flavors WHERE id = $1', [id]);
+      res.sendStatus(204);
+      client.release();
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');
+    }
+  }); 
