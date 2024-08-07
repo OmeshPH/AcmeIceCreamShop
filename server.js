@@ -47,3 +47,17 @@ app.get('/api/flavors/:id', async (req, res) => {
       res.status(500).send('Server Error');
     }
   });
+
+  app.post('/api/flavors', async (req, res) => {
+    try {
+      const { name, is_favorite } = req.body;
+      const client = await pool.connect();
+      const result = await client.query('INSERT INTO flavors (name, is_favorite) VALUES ($1, $2) RETURNING *', [name, is_favorite]);
+      const newFlavor = result.rows[0];
+      res.status(201).json(newFlavor);
+      client.release();
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');
+    }
+  });
